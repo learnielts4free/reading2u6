@@ -1,0 +1,1877 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive English Test - Ms Lê Hằng English</title>
+    <!-- Google Fonts: Nunito mang phong cách tròn trịa, thân thiện chuẩn giáo dục Gamification -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(-45deg, #8854C0, #00C9A7, #FDCB6E, #FF4757);
+            --bg-correct: #00D26A;
+            --bg-wrong: #FF4757;
+            --text-dark: #2D3436;
+            --card-shadow: 0 8px 0 #DFE6E9;
+            --card-shadow-active: 0 4px 0 #DFE6E9;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Nunito', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #f7f9fc;
+            /* Tạo hình nền loang động kết hợp SVG Pattern các emoji lơ lửng chủ đề Ngôi nhà */
+            background-image: 
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Ctext x='10' y='30' font-size='22' opacity='0.15'%3E🏡%3C/text%3E%3Ctext x='60' y='80' font-size='20' opacity='0.15'%3E✨%3C/text%3E%3Ctext x='80' y='30' font-size='18' opacity='0.12'%3E🌱%3C/text%3E%3C/svg%3E"),
+                linear-gradient(-45deg, #f3e8ff, #e6fffa, #fff9db, #ffe3e3);
+            background-size: 160px 160px, 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            color: var(--text-dark);
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%, 0% 50%; }
+            50% { background-position: 160px 160px, 100% 50%; }
+            100% { background-position: 0% 50%, 0% 50%; }
+        }
+
+        /* Top Control Bar */
+        .top-bar {
+            background: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            z-index: 10;
+            border-bottom: 3px solid #E4E8EE;
+        }
+
+        .teacher-brand {
+            display: flex;
+            flex-direction: column;
+        }
+        .teacher-brand h5 {
+            font-size: 0.85rem;
+            color: #747D8C;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .teacher-brand h2 {
+            font-size: 1.3rem;
+            color: #6C5CE7;
+            font-weight: 900;
+        }
+
+        .timer-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #F1F2F6;
+            padding: 8px 16px;
+            border-radius: 30px;
+            border: 2px solid #CED6E0;
+        }
+
+        .timer-display {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #2F3542;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .btn-timer {
+            background: #6C5CE7;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 3px 0 #5352ED;
+            transition: all 0.1s;
+            font-size: 0.85rem;
+        }
+        .btn-timer:active {
+            transform: translateY(3px);
+            box-shadow: none;
+        }
+
+        /* Split-Screen Main Layout */
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            height: calc(100vh - 70px);
+        }
+
+        .pane {
+            flex: 1;
+            overflow-y: auto;
+            padding: 25px;
+            scroll-behavior: smooth;
+        }
+
+        .left-pane {
+            border-right: 4px solid #E4E8EE;
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(10px);
+        }
+
+        .right-pane {
+            background: rgba(241, 242, 246, 0.4);
+        }
+
+        /* Custom Scrollbar */
+        .pane::-webkit-scrollbar {
+            width: 8px;
+        }
+        .pane::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .pane::-webkit-scrollbar-thumb {
+            background: #CED6E0;
+            border-radius: 10px;
+        }
+        .pane::-webkit-scrollbar-thumb:hover {
+            background: #A4B0BE;
+        }
+
+        /* Typography & Components style */
+        .section-header {
+            background: linear-gradient(135deg, #6C5CE7, #8854C0);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            font-weight: 800;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.2);
+            display: inline-block;
+        }
+
+        .passage-card {
+            background: white;
+            border: 3px solid #E4E8EE;
+            border-radius: 20px;
+            padding: 22px;
+            margin-bottom: 30px;
+            box-shadow: var(--card-shadow);
+            position: relative;
+        }
+
+        .passage-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #6C5CE7;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .passage-text {
+            font-size: 1.05rem;
+            line-height: 1.75;
+            color: #2D3436;
+            font-weight: 600;
+            text-align: justify;
+        }
+
+        /* Translation Accordion */
+        .btn-translate {
+            background: #FFF;
+            border: 2px solid #FDCB6E;
+            color: #D6A217;
+            padding: 8px 16px;
+            border-radius: 15px;
+            margin-top: 15px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 0 #FDCB6E;
+            transition: all 0.1s;
+        }
+        .btn-translate:hover {
+            background: #FFFDF0;
+        }
+        .btn-translate:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+
+        .translation-content {
+            display: none;
+            margin-top: 12px;
+            padding: 15px;
+            background: #FFFDF0;
+            border-left: 4px solid #FDCB6E;
+            border-radius: 8px;
+            font-size: 0.98rem;
+            color: #57606F;
+            font-style: italic;
+            line-height: 1.6;
+        }
+
+        /* Glossary Table */
+        .glossary-box {
+            margin-top: 20px;
+            border: 2px dashed #00C9A7;
+            border-radius: 15px;
+            padding: 15px;
+            background: #E6FFFA;
+        }
+        .glossary-title {
+            color: #009688;
+            font-weight: 800;
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .glossary-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        .glossary-table th {
+            background: #00C9A7;
+            color: white;
+            text-align: left;
+            padding: 6px 10px;
+            font-weight: 700;
+        }
+        .glossary-table td {
+            padding: 6px 10px;
+            border-bottom: 1px solid #C7ECEE;
+            color: #2F3542;
+            font-weight: 600;
+        }
+        .glossary-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Exercises Style (Right Pane) */
+        .question-card {
+            background: white;
+            border: 3px solid #E4E8EE;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .question-number {
+            font-size: 0.95rem;
+            font-weight: 800;
+            background: #FFEAA7;
+            color: #D6A217;
+            padding: 3px 10px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .question-text {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #2D3436;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        /* Clickable blank for Text/Fill blank types */
+        .clickable-blank {
+            display: inline-block;
+            background: #E4E8EE;
+            border-bottom: 3px solid #A4B0BE;
+            padding: 2px 12px;
+            border-radius: 8px;
+            color: #6C5CE7;
+            cursor: pointer;
+            font-weight: 800;
+            margin: 0 4px;
+            transition: all 0.2s;
+        }
+        .clickable-blank:hover {
+            background: #FFEAA7;
+            border-color: #FDCB6E;
+        }
+
+        /* Option Grid */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .option-btn {
+            background: white;
+            border: 3px solid #E4E8EE;
+            padding: 14px 20px;
+            border-radius: 16px;
+            text-align: left;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #4B5257;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #E4E8EE;
+            transition: all 0.1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .option-btn:hover:not(.disabled) {
+            transform: translateY(-2px);
+            border-color: #A4B0BE;
+            box-shadow: 0 7px 0 #A4B0BE;
+            background-color: #F8F9FA;
+        }
+
+        .option-btn:active:not(.disabled) {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+
+        /* Correct state */
+        .option-btn.correct {
+            background-color: #E6FFFA !important;
+            border-color: var(--bg-correct) !important;
+            color: #008744 !important;
+            box-shadow: 0 5px 0 var(--bg-correct) !important;
+        }
+        /* Wrong state */
+        .option-btn.wrong {
+            background-color: #FFE3E3 !important;
+            border-color: var(--bg-wrong) !important;
+            color: #C0392B !important;
+            box-shadow: 0 5px 0 var(--bg-wrong) !important;
+        }
+
+        .option-btn.disabled {
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+
+        /* Feedback / Teacher Explanation Box */
+        .explanation-box {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 15px;
+            background: #F6F5FF;
+            border: 2px solid #6C5CE7;
+            animation: fadeIn 0.4s ease forwards;
+        }
+        .exp-title {
+            color: #6C5CE7;
+            font-weight: 800;
+            font-size: 0.95rem;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .exp-content {
+            font-size: 0.92rem;
+            line-height: 1.55;
+            color: #485460;
+        }
+        .exp-content p {
+            margin-bottom: 6px;
+        }
+        .exp-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Shake animation for wrong answer */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+        .shake-animation {
+            animation: shake 0.4s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Action Footer */
+        .footer-action {
+            background: white;
+            padding: 15px 35px;
+            border-top: 3px solid #E4E8EE;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #00C9A7, #00D26A);
+            color: white;
+            border: none;
+            padding: 14px 40px;
+            font-size: 1.15rem;
+            font-weight: 800;
+            border-radius: 20px;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #00A86B;
+            transition: all 0.1s;
+        }
+        .btn-submit:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+
+        /* Modal Score Summary Popup */
+        .modal-overlay {
+            display: flex;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(47, 53, 66, 0.8);
+            backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-content {
+            background: white;
+            width: 90%;
+            max-width: 550px;
+            border-radius: 30px;
+            padding: 35px;
+            text-align: center;
+            border: 4px solid #6C5CE7;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+            transform: scale(0.8);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+        .score-circle {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6C5CE7, #8854C0);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.2rem;
+            font-weight: 900;
+            margin: 0 auto 20px;
+            box-shadow: 0 8px 20px rgba(108,92,231,0.4);
+        }
+        .modal-title {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: #2D3436;
+            margin-bottom: 10px;
+        }
+        .modal-feedback {
+            font-size: 1.1rem;
+            color: #57606F;
+            font-weight: 600;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+        .btn-close-modal {
+            background: #6C5CE7;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1rem;
+            font-weight: 700;
+            border-radius: 15px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #5352ED;
+        }
+        .btn-close-modal:active {
+            transform: translateY(3px);
+            box-shadow: none;
+        }
+
+        /* Confetti Elements canvas container */
+        #confetti-canvas {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 3000;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- Top Control Bar -->
+    <div class="top-bar">
+        <div class="teacher-brand">
+            <h5>Giáo viên tạo: Ms Lê Hằng English</h5>
+            <h2>BÀI KIỂM TRA TRẮC NGHIỆM TƯƠNG TÁC</h2>
+        </div>
+        <div class="timer-container">
+            <span class="timer-display" id="timer-text">10:00</span>
+            <button class="btn-timer" id="btn-timer-toggle" onclick="toggleTimer()">BẮT ĐẦU TÍNH GIỜ LÀM BÀI</button>
+        </div>
+    </div>
+
+    <!-- Main Container Layout split layout -->
+    <div class="main-container">
+        
+        <!-- Left Pane: Reading Passages & Glossaries -->
+        <div class="pane left-pane">
+            <div class="section-header">📖 READING PASSAGES</div>
+
+            <!-- PASSAGE 1 -->
+            <div class="passage-card" id="passage-1">
+                <div class="passage-title">🏡 Passage 1: Welcome to My House!</div>
+                <div class="passage-text">
+                    Hello everyone! My house is small but very cozy. There are two bedrooms, a kitchen, a bathroom, and a living room. I love spending time with my family here. The garden is full of colorful flowers, and we often sit there to enjoy the fresh air. My favorite place is my bedroom because it is quiet and comfortable. I feel happy and safe in my lovely home!
+                </div>
+                <button class="btn-translate" onclick="toggleTranslation(1)">🌟 Mở dịch đoạn này</button>
+                <div class="translation-content" id="trans-1">
+                    Xin chào mọi người! Ngôi nhà của mình nhỏ nhưng rất ấm cúng. Có hai phòng ngủ, một nhà bếp, một phòng tắm và một phòng khách. Mình thích dành thời gian bên gia đình ở đây. Khu vườn đầy những bông hoa rực rỡ sắc màu, và chúng mình thường ngồi đó để tận hưởng không khí trong lành. Nơi yêu thích của mình là phòng ngủ vì nó yên tĩnh và thoải mái. Mình cảm thấy hạnh phúc và an toàn trong ngôi nhà đáng yêu của mình!
+                </div>
+                
+                <!-- Glossary 1 -->
+                <div class="glossary-box">
+                    <div class="glossary-title">💡 Từ vựng mở rộng (Glossary)</div>
+                    <table class="glossary-table">
+                        <thead>
+                            <tr><th>Từ vựng</th><th>Loại từ</th><th>Nghĩa tiếng Việt</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>cozy</td><td>adj</td><td>ấm cúng, thoải mái</td></tr>
+                            <tr><td>spend</td><td>v</td><td>dành (thời gian / tiền bạc)</td></tr>
+                            <tr><td>colorful</td><td>adj</td><td>nhiều màu sắc, rực rỡ</td></tr>
+                            <tr><td>fresh air</td><td>n</td><td>không khí trong lành</td></tr>
+                            <tr><td>comfortable</td><td>adj</td><td>dễ chịu, tiện nghi</td></tr>
+                            <tr><td>lovely</td><td>adj</td><td>đáng yêu, xinh xắn</td></tr>
+                            <tr><td>safe</td><td>adj</td><td>an toàn</td></tr>
+                            <tr><td>favorite</td><td>adj</td><td>được yêu thích nhất</td></tr>
+                            <tr><td>quiet</td><td>adj</td><td>yên tĩnh</td></tr>
+                            <tr><td>everyone</td><td>pronoun</td><td>mọi người</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- PASSAGE 2 -->
+            <div class="passage-card" id="passage-2">
+                <div class="passage-title">🏢 Passage 2: Find Your Dream Apartment!</div>
+                <div class="passage-text">
+                    Are you looking for a nice place to live? Come and see our beautiful apartments! Each apartment has two bedrooms, a modern kitchen, a clean bathroom, and a bright living room. You can enjoy the big balcony and lovely city view every day. The building is safe and close to shops, schools, and parks. Don’t wait! Call us today and make this wonderful apartment your new home!
+                </div>
+                <button class="btn-translate" onclick="toggleTranslation(2)">🌟 Mở dịch đoạn này</button>
+                <div class="translation-content" id="trans-2">
+                    Bạn đang tìm kiếm một nơi tuyệt vời để sống? Hãy đến và chiêm ngưỡng những căn hộ xinh đẹp của chúng tôi! Mỗi căn hộ có hai phòng ngủ, một nhà bếp hiện đại, một phòng tắm sạch sẽ và một phòng khách tươi sáng. Bạn có thể tận hưởng ban công rộng lớn và tầm nhìn ra thành phố tuyệt đẹp mỗi ngày. Tòa nhà rất an toàn và gần các cửa hàng, trường học và công viên. Đừng chờ đợi! Hãy gọi cho chúng tôi hôm nay và biến căn hộ tuyệt vời này thành ngôi nhà mới của bạn!
+                </div>
+
+                <!-- Glossary 2 -->
+                <div class="glossary-box">
+                    <div class="glossary-title">💡 Từ vựng mở rộng (Glossary)</div>
+                    <table class="glossary-table">
+                        <thead>
+                            <tr><th>Từ vựng</th><th>Loại từ</th><th>Nghĩa tiếng Việt</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>apartment</td><td>n</td><td>căn hộ chung cư</td></tr>
+                            <tr><td>look for</td><td>v.phr</td><td>tìm kiếm</td></tr>
+                            <tr><td>modern</td><td>adj</td><td>hiện đại</td></tr>
+                            <tr><td>bright</td><td>adj</td><td>sáng sủa, tươi sáng</td></tr>
+                            <tr><td>balcony</td><td>n</td><td>ban công</td></tr>
+                            <tr><td>city view</td><td>n</td><td>tầm nhìn hướng thành phố</td></tr>
+                            <tr><td>building</td><td>n</td><td>tòa nhà</td></tr>
+                            <tr><td>wonderful</td><td>adj</td><td>tuyệt vời</td></tr>
+                            <tr><td>dream</td><td>n/adj</td><td>mơ ước, lý tưởng</td></tr>
+                            <tr><td>close to</td><td>adj.phr</td><td>gần với</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- PASSAGE 3 -->
+            <div class="passage-card" id="passage-3">
+                <div class="passage-title">✨ Passage 3: My Cozy House</div>
+                <div class="passage-text">
+                    Check out my cozy house! It's not too big, but it's just right for me. I have a comfy living room where I relax and watch TV. My kitchen is small, but I love cooking there. The bedroom is peaceful, perfect for sleeping. Outside, there's a small garden with some pretty flowers. It's a quiet place, and I really enjoy living here. My house feels like home!
+                </div>
+                <button class="btn-translate" onclick="toggleTranslation(3)">🌟 Mở dịch đoạn này</button>
+                <div class="translation-content" id="trans-3">
+                    Hãy xem ngôi nhà ấm cúng của mình này! Nó không quá lớn, nhưng vừa vặn với mình. Mình có một phòng khách thoải mái nơi mình thư giãn và xem TV. Nhà bếp của mình nhỏ, nhưng mình thích nấu ăn ở đó. Phòng ngủ thì yên bình, hoàn hảo cho giấc ngủ. Bên ngoài, có một khu vườn nhỏ với một vài bông hoa xinh xắn. Đó là một nơi yên tĩnh, và mình thực sự tận hưởng việc sống ở đây. Ngôi nhà mang lại cảm giác thân thương như tổ ấm thực sự!
+                </div>
+
+                <!-- Glossary 3 -->
+                <div class="glossary-box">
+                    <div class="glossary-title">💡 Từ vựng mở rộng (Glossary)</div>
+                    <table class="glossary-table">
+                        <thead>
+                            <tr><th>Từ vựng</th><th>Loại từ</th><th>Nghĩa tiếng Việt</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>check out</td><td>v.phr</td><td>xem qua, kiểm tra</td></tr>
+                            <tr><td>comfy</td><td>adj</td><td>thoải mái, dễ chịu (nói tắt)</td></tr>
+                            <tr><td>relax</td><td>v</td><td>thư giãn</td></tr>
+                            <tr><td>peaceful</td><td>adj</td><td>yên bình, thái bình</td></tr>
+                            <tr><td>perfect</td><td>adj</td><td>hoàn hảo</td></tr>
+                            <tr><td>outside</td><td>adv/adv</td><td>phía bên ngoài</td></tr>
+                            <tr><td>pretty</td><td>adj</td><td>xinh xắn, đẹp đẽ</td></tr>
+                            <tr><td>enjoy</td><td>v</td><td>thưởng thức, yêu thích</td></tr>
+                            <tr><td>just right</td><td>adj.phr</td><td>vừa vặn, vừa vặn chính xác</td></tr>
+                            <tr><td>feel like</td><td>v.phr</td><td>cảm thấy giống như</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- PASSAGE 4 (Ex 22 - 1) -->
+            <div class="passage-card" id="passage-4">
+                <div class="passage-title">🌿 Passage 4: My Dream House</div>
+                <div class="passage-text">
+                    My dream house is in the countryside. It has lots of rooms and windows. There is a big bookshelf in the living room. Everyone in my family can read their favourite books in this room. There is a kitchen in my dream house. There my mum and I can cook together. There is a fridge and it has drinks and snacks. There are extra bedrooms, so my friends can sleep over. My dream house also has a big garden. I can plant flowers and vegetables there.
+                </div>
+                <button class="btn-translate" onclick="toggleTranslation(4)">🌟 Mở dịch đoạn này</button>
+                <div class="translation-content" id="trans-4">
+                    Ngôi nhà mơ ước của mình nằm ở vùng nông thôn. Nó có rất nhiều phòng và cửa sổ. Có một giá sách lớn ở phòng khách. Mọi người trong gia đình mình có thể đọc những cuốn sách yêu thích của họ trong căn phòng này. Có một nhà bếp trong ngôi nhà mơ ước của mình. Ở đó, mẹ và mình có thể cùng nhau nấu ăn. Có một tủ lạnh chứa đầy đồ uống và đồ ăn nhẹ. Có thêm các phòng ngủ phụ, vì vậy bạn bè của mình có thể đến ngủ lại qua đêm. Ngôi nhà mơ ước của mình cũng có một khu vườn lớn. Mình có thể trồng hoa và rau ở đó.
+                </div>
+
+                <!-- Glossary 4 -->
+                <div class="glossary-box">
+                    <div class="glossary-title">💡 Từ vựng mở rộng (Glossary)</div>
+                    <table class="glossary-table">
+                        <thead>
+                            <tr><th>Từ vựng</th><th>Loại từ</th><th>Nghĩa tiếng Việt</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>countryside</td><td>n</td><td>vùng nông thôn</td></tr>
+                            <tr><td>bookshelf</td><td>n</td><td>giá sách</td></tr>
+                            <tr><td>favourite</td><td>adj</td><td>yêu thích</td></tr>
+                            <tr><td>snack</td><td>n</td><td>đồ ăn nhẹ, quà vặt</td></tr>
+                            <tr><td>extra</td><td>adj</td><td>thêm, phụ, bổ sung</td></tr>
+                            <tr><td>sleep over</td><td>v.phr</td><td>ngủ lại nhà người khác</td></tr>
+                            <tr><td>plant</td><td>v</td><td>trồng (cây, hoa)</td></tr>
+                            <tr><td>vegetable</td><td>n</td><td>rau củ</td></tr>
+                            <tr><td>fridge</td><td>n</td><td>tủ lạnh</td></tr>
+                            <tr><td>together</td><td>adv</td><td>cùng nhau</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- PASSAGE 5 (Ex 22 - 2) -->
+            <div class="passage-card" id="passage-5">
+                <div class="passage-title">✉️ Passage 5: Letter to Hanh</div>
+                <div class="passage-text">
+                    Dear Hanh,
+                    I’m writing to you to a party we are having in the flat next Friday, December 14th. As you know, it’s Lan’s 13th birthday next week and my birthday next month. So we thought we’d celebrate together and have a join party. I can’t remember if you know my address or not, but anyway, if you follow the direction below, you shouldn’t get lost. Take the number 15 bus from the station and get off the Star hotel. Walk down Long Viet Road, past the Dan Chu cinema, and then take the first turning on the right. That’s Le Loi road. Turn left at the first junction, then go straight past the church as far as the next crossroads. Turn right and our block of flat is the second one on the right.
+                    Do try and come. Of course, you’re welcome to bring someone with you if you want to.
+                    Look forward to seeing you then!
+                    Love,
+                    Trang
+                </div>
+                <button class="btn-translate" onclick="toggleTranslation(5)">🌟 Mở dịch đoạn này</button>
+                <div class="translation-content" id="trans-5">
+                    Hạnh thân mến,
+                    Mình viết thư này cho bạn về một bữa tiệc mà chúng mình sẽ tổ chức tại căn hộ vào thứ Sáu tuần tới, ngày 14 tháng 12. Như bạn đã biết, tuần tới là sinh nhật lần thứ 13 của Lan và tháng sau là sinh nhật của mình. Vì vậy, chúng mình nghĩ sẽ chúc mừng cùng nhau và tổ chức một bữa tiệc chung. Mình không nhớ chắc bạn có biết địa chỉ của mình hay không, nhưng dù sao đi nữa, nếu bạn đi theo chỉ dẫn bên dưới, bạn chắc chắn sẽ không bị lạc đâu. Hãy bắt xe buýt số 15 từ nhà ga và xuống xe tại khách sạn Ngôi Sao (Star hotel). Đi bộ dọc theo đường Long Việt, đi qua rạp chiếu phim Dân Chủ, rồi rẽ ở ngã rẽ đầu tiên bên phải. Đó là đường Lê Lợi. Rẽ trái tại giao lộ đầu tiên, sau đó đi thẳng qua nhà thờ cho đến ngã tư tiếp theo. Rẽ phải và tòa nhà căn hộ của chúng mình là tòa thứ hai bên tay phải.
+                    Hãy cố gắng đến nhé. Tất nhiên, bạn hoàn toàn có thể dẫn theo ai đó đi cùng nếu muốn.
+                    Rất mong được gặp bạn lúc đó!
+                    Thân ái,
+                    Trang
+                </div>
+
+                <!-- Glossary 5 -->
+                <div class="glossary-box">
+                    <div class="glossary-title">💡 Từ vựng mở rộng (Glossary)</div>
+                    <table class="glossary-table">
+                        <thead>
+                            <tr><th>Từ vựng</th><th>Loại từ</th><th>Nghĩa tiếng Việt</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>celebrate</td><td>v</td><td>kỷ niệm, ăn mừng</td></tr>
+                            <tr><td>direction</td><td>n</td><td>hướng đi, lời chỉ dẫn</td></tr>
+                            <tr><td>get lost</td><td>v.phr</td><td>bị lạc đường</td></tr>
+                            <tr><td>turning</td><td>n</td><td>chỗ rẽ, ngã rẽ</td></tr>
+                            <tr><td>junction</td><td>n</td><td>giao lộ, điểm nối</td></tr>
+                            <tr><td>crossroads</td><td>n</td><td>ngã tư, ngã rẽ chữ thập</td></tr>
+                            <tr><td>block of flats</td><td>n.phr</td><td>tòa nhà chung cư</td></tr>
+                            <tr><td>welcome</td><td>adj</td><td>được chào đón</td></tr>
+                            <tr><td>look forward to</td><td>v.phr</td><td>mong đợi, trông ngóng</td></tr>
+                            <tr><td>station</td><td>n</td><td>nhà ga, trạm dừng</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- PASSAGE 6 (Ex 23 - 1) -->
+            <div class="passage-card" id="passage-6">
+                <div class="passage-title">⚽ Passage 6: Cody's House</div>
+                <div class="passage-text">
+                    My name’s Cody and this is my house! My house is very big. It has two floors - a ground floor and a first floor. On the ground floor, there is a living room, a kitchen, a dining room and a bathroom. On the first floor, there are three bedrooms, one bathroom and a balcony. My bedroom is between my parents' bedroom and the bath room. My brother's bedroom is in front of mine. In my bedroom, everything is blue and white. There is a small bed, a desk, a bookshelf and a TV. The desk is under the window. There's a big picture of my favorite football team on the wall. There is also a lamp and a tablet on my desk. I love my bedroom, but I also like the balcony because it is very spacious so I can grow some flowers and sometimes read books. At the back of the house, there are two swings and a small swimming pool. I love my house! It's very comfortable and cozy.
+                </div>
+                <button class="btn-translate" onclick="toggleTranslation(6)">🌟 Mở dịch đoạn này</button>
+                <div class="translation-content" id="trans-6">
+                    Tên của mình là Cody và đây là ngôi nhà của mình! Nhà mình rất lớn. Nó có hai tầng - một tầng trệt và một tầng lầu (tầng một). Ở tầng trệt có một phòng khách, một nhà bếp, một phòng ăn và một phòng tắm. Trên tầng một, có ba phòng ngủ, một phòng tắm và một ban công. Phòng ngủ của mình nằm giữa phòng ngủ của bố mẹ và phòng tắm. Phòng ngủ của em trai mình ở ngay trước phòng của mình. Trong phòng ngủ của mình, mọi thứ đều có màu xanh lam và trắng. Có một chiếc giường nhỏ, một cái bàn học, một giá sách và một cái TV. Bàn học được đặt dưới cửa sổ. Có một bức tranh lớn về đội bóng đá yêu thích của mình treo trên tường. Cũng có một chiếc đèn và một máy tính bảng trên bàn học của mình. Mình yêu phòng ngủ của mình, nhưng mình cũng thích ban công vì nó rất rộng rãi nên mình có thể trồng một số loài hoa và đôi khi đọc sách. Ở phía sau nhà, có hai chiếc xích đu và một hồ bơi nhỏ. Mình yêu ngôi nhà của mình! Nó rất thoải mái và ấm cúng.
+                </div>
+            </div>
+
+            <!-- PASSAGE 7 (Ex 23 - 2) -->
+            <div class="passage-card" id="passage-7">
+                <div class="passage-title">🚗 Passage 7: Janet's Country House</div>
+                <div class="passage-text">
+                    My name is Janet and this is my house. It is a lovely big house in the countryside. It has got two floors: the ground floor and the first floor. On the ground floor, there is a kitchen, a dining room and a living room. My bedroom is on the first floor. I share my bedroom with my sister. There is also my parents’ bedroom, a guest room and a bathroom. My house also has got a garage where my parents park the family car, a swimming pool and a small room where my parents keep some old stuff. Around the house there is a huge carpet of grass. I love it because my sister and I have lots of fun here.
+                </div>
+                <button class="btn-translate" onclick="toggleTranslation(7)">🌟 Mở dịch đoạn này</button>
+                <div class="translation-content" id="trans-7">
+                    Tên mình là Janet và đây là nhà của mình. Đó là một ngôi nhà lớn đáng yêu ở vùng nông thôn. Nó có hai tầng: tầng trệt và tầng một. Ở tầng trệt có nhà bếp, phòng ăn và phòng khách. Phòng ngủ của mình ở trên tầng một. Mình chung phòng ngủ với chị gái. Ngoài ra còn có phòng ngủ của bố mẹ, một phòng khách (phòng cho khách ở lại) và một phòng tắm. Nhà mình còn có một nhà để xe nơi bố mẹ đỗ xe ô tô của gia đình, một hồ bơi và một căn phòng nhỏ nơi bố mẹ cất giữ vài món đồ cũ. Xung quanh nhà có một thảm cỏ khổng lồ. Mình yêu nó vì chị gái và mình có rất nhiều niềm vui ở đây.
+                </div>
+            </div>
+
+            <!-- PASSAGE 8 (Ex 23 - 3) -->
+            <div class="passage-card" id="passage-8">
+                <div class="passage-title">🧁 Passage 8: My Grandparents' English Cottage</div>
+                <div class="passage-text">
+                    My grandparents live in a cottage in the countryside of England. The house is not very big but my grandmother always keeps it clean and tidy. It has one floor and an attic. There are two bedrooms, a kitchen, a small living room, a dining room and a bathroom. Inside the house, there is a fireplace, a chimney and a spacious balcony at the back with a fine view. In front of the house, there is a beautiful garden with full of flowers and color. I usually visit my grandparents at weekends. My grandmother is a wonderful cook and she bakes my favorite chocolate cupcakes whenever I go there. I love my grandparents and the quietness of their surroundings.
+                </div>
+                <button class="btn-translate" onclick="toggleTranslation(8)">🌟 Mở dịch đoạn này</button>
+                <div class="translation-content" id="trans-8">
+                    Ông bà của mình sống trong một ngôi nhà gỗ nhỏ (cottage) ở vùng nông thôn nước Anh. Ngôi nhà không lớn lắm nhưng bà nội luôn giữ gìn nó sạch sẽ và ngăn nắp. Nhà chỉ có một tầng và một tầng gác mái. Có hai phòng ngủ, một nhà bếp, một phòng khách nhỏ, một phòng ăn và một phòng tắm. Bên trong ngôi nhà có một lò sưởi, một ống khói và một ban công rộng rãi phía sau với tầm nhìn tuyệt đẹp. Trước nhà có một khu vườn xinh đẹp tràn ngập hoa và sắc màu. Mình thường đến thăm ông bà vào cuối tuần. Bà của mình là một đầu bếp tuyệt vời và bà luôn nướng những chiếc bánh cupcake sô-cô-la yêu thích của mình bất cứ khi nào mình đến đó. Mình yêu ông bà và sự yên tĩnh của không gian xung quanh họ.
+                </div>
+            </div>
+
+            <!-- PASSAGE 9 (Ex 23 - 4) -->
+            <div class="passage-card" id="passage-9">
+                <div class="passage-title">🌾 Passage 9: Hoa's Countryside House</div>
+                <div class="passage-text">
+                    Hoa's family lives in a beautiful house in the country. There are many flowers in front of her house. Behind the house, there is a well. To the right of the house, there is a rice-paddy and to the left of the house, there are tall trees. It's very quiet here and Hoa loves her house very much. Hoa's father is a worker. He works in a big factory. Every day, he travels to work by motorbike. He works in his factory from Monday to Friday. He doesn't work on Saturdays and Sundays.
+                </div>
+                <button class="btn-translate" onclick="toggleTranslation(9)">🌟 Mở dịch đoạn này</button>
+                <div class="translation-content" id="trans-9">
+                    Gia đình Hoa sống trong một ngôi nhà đẹp ở nông thôn. Có rất nhiều hoa ở trước cửa nhà cô ấy. Phía sau ngôi nhà có một cái giếng. Bên phải ngôi nhà có một cánh đồng lúa và bên trái ngôi nhà có những hàng cây cao vút. Nơi đây rất yên tĩnh và Hoa yêu ngôi nhà của mình rất nhiều. Bố của Hoa là công nhân. Ông làm việc trong một công xưởng lớn. Mỗi ngày, ông đi làm bằng xe máy. Ông làm việc ở nhà máy từ thứ Hai đến thứ Sáu. Ông không làm việc vào các ngày thứ Bảy và Chủ Nhật.
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Pane: Interactive Exercises Grid -->
+        <div class="pane right-pane" id="exercises-container">
+            <div class="section-header">✏️ PRACTICE EXERCISES</div>
+            
+            <!-- EXERCISE 20 -->
+            <h3 style="color: #6C5CE7; margin-bottom: 15px; font-weight: 800;">Exercise 20: Read and select the correct options</h3>
+            
+            <!-- Q1 -->
+            <div class="question-card" id="q-ex20-1">
+                <div class="question-number">Đoạn 1 - Câu 1</div>
+                <div class="question-text">My house is <span class="clickable-blank" onclick="showBlankAnswer(this, 'small')">.......</span> but very cozy.</div>
+                <div class="options-grid" data-correct="B">
+                    <button class="option-btn" data-opt="A">A. messy</button>
+                    <button class="option-btn" data-opt="B">B. small</button>
+                    <button class="option-btn" data-opt="C">C. big</button>
+                    <button class="option-btn" data-opt="D">D. dirty</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Giải thích chi tiết từ Thạc sỹ:</div>
+                    <div class="exp-content">
+                        <p><strong>Phân tích nghĩa:</strong> A. messy (bừa bộn), B. small (nhỏ), C. big (lớn), D. dirty (bẩn).</p>
+                        <p><strong>Lý do chọn:</strong> Dựa trên liên từ đối lập <em>"but very cozy"</em> (nhưng rất ấm cúng), từ phù hợp nhất để miêu tả kích thước nhỏ nhắn nhưng mang lại cảm giác dễ chịu là <strong>small</strong>. Tránh chọn tính từ tiêu cực như messy hay dirty vì đoạn văn mang sắc thái tích cực.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q2 -->
+            <div class="question-card" id="q-ex20-2">
+                <div class="question-number">Đoạn 1 - Câu 2</div>
+                <div class="question-text">I love <span class="clickable-blank" onclick="showBlankAnswer(this, 'spending')">.......</span> time with my family here.</div>
+                <div class="options-grid" data-correct="C">
+                    <button class="option-btn" data-opt="A">A. to spending</button>
+                    <button class="option-btn" data-opt="B">B. to spend</button>
+                    <button class="option-btn" data-opt="C">C. spending</button>
+                    <button class="option-btn" data-opt="D">D. spend</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Giải thích chi tiết từ Thạc sỹ:</div>
+                    <div class="exp-content">
+                        <p><strong>Cấu trúc Ngữ pháp:</strong> Động từ chỉ sở thích như <code>love / like / hate / enjoy</code> theo quy tắc phải đi kèm danh động từ (<strong>V-ing</strong>) để diễn tả một sở thích lâu dài. Do đó, <strong>spending</strong> là đáp án chuẩn xác nhất.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q3 -->
+            <div class="question-card" id="q-ex20-3">
+                <div class="question-number">Đoạn 1 - Câu 3</div>
+                <div class="question-text">...and we often <span class="clickable-blank" onclick="showBlankAnswer(this, 'sit')">.......</span> there to enjoy the fresh air.</div>
+                <div class="options-grid" data-correct="A">
+                    <button class="option-btn" data-opt="A">A. sit</button>
+                    <button class="option-btn" data-opt="B">B. will sit</button>
+                    <button class="option-btn" data-opt="C">C. sat</button>
+                    <button class="option-btn" data-opt="D">D. sits</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Giải thích chi tiết từ Thạc sỹ:</div>
+                    <div class="exp-content">
+                        <p><strong>Ngữ pháp Hiện tại đơn:</strong> Sự xuất hiện của trạng từ tần suất <code>often</code> chỉ một thói quen ở hiện tại. Với chủ ngữ số nhiều <code>we</code>, động từ nguyên mẫu <strong>sit</strong> được giữ nguyên không chia.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q4 -->
+            <div class="question-card" id="q-ex20-4">
+                <div class="question-number">Đoạn 1 - Câu 4</div>
+                <div class="question-text">My favorite place is my bedroom <span class="clickable-blank" onclick="showBlankAnswer(this, 'because')">.......</span> it is quiet and comfortable.</div>
+                <div class="options-grid" data-correct="C">
+                    <button class="option-btn" data-opt="A">A. or</button>
+                    <button class="option-btn" data-opt="B">B. and</button>
+                    <button class="option-btn" data-opt="C">C. because</button>
+                    <button class="option-btn" data-opt="D">D. so</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Giải thích chi tiết từ Thạc sỹ:</div>
+                    <div class="exp-content">
+                        <p><strong>Liên từ chỉ nguyên nhân:</strong> Vế sau <em>"it is quiet and comfortable"</em> giải thích lý do tại sao phòng ngủ lại là nơi yêu thích nhất. Vì vậy ta cần liên từ chỉ nguyên nhân <strong>because</strong> (bởi vì).</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EX20 - PART 2 -->
+            <!-- Q5 -->
+            <div class="question-card" id="q-ex20-5">
+                <div class="question-number">Đoạn 2 - Câu 1</div>
+                <div class="question-text">Are you looking <span class="clickable-blank" onclick="showBlankAnswer(this, 'for')">.......</span> a nice place to live?</div>
+                <div class="options-grid" data-correct="B">
+                    <button class="option-btn" data-opt="A">A. at</button>
+                    <button class="option-btn" data-opt="B">B. for</button>
+                    <button class="option-btn" data-opt="C">C. with</button>
+                    <button class="option-btn" data-opt="D">D. to</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Giải thích chi tiết từ Thạc sỹ:</div>
+                    <div class="exp-content">
+                        <p><strong>Cụm động từ (Phrasal Verb):</strong> Cụm từ cố định <code>look for</code> nghĩa là tìm kiếm, hoàn toàn phù hợp ngữ cảnh quảng cáo tìm nhà. (Ghi chú: <em>look at</em> nghĩa là nhìn vào).</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q6 -->
+            <div class="question-card" id="q-ex20-6">
+                <div class="question-number">Đoạn 2 - Câu 2</div>
+                <div class="question-text">Come and see our <span class="clickable-blank" onclick="showBlankAnswer(this, 'beautiful')">.......</span> apartments!</div>
+                <div class="options-grid" data-correct="D">
+                    <button class="option-btn" data-opt="A">A. kind</button>
+                    <button class="option-btn" data-opt="B">B. friendly</button>
+                    <button class="option-btn" data-opt="C">C. unreal</button>
+                    <button class="option-btn" data-opt="D">D. beautiful</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Giải thích chi tiết từ Thạc sỹ:</div>
+                    <div class="exp-content">
+                        <p><strong>Tính từ chỉ đặc điểm vật thể:</strong> Căn hộ thương mại dùng để quảng cáo lôi kéo người mua cần tính từ thẩm mỹ cao như <strong>beautiful</strong> (xinh đẹp). Các từ <em>kind</em> hay <em>friendly</em> chỉ dùng cho người/tính cách.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q7 -->
+            <div class="question-card" id="q-ex20-7">
+                <div class="question-number">Đoạn 2 - Câu 3</div>
+                <div class="question-text">Each apartment <span class="clickable-blank" onclick="showBlankAnswer(this, 'has')">.......</span> two bedrooms, a modern kitchen...</div>
+                <div class="options-grid" data-correct="C">
+                    <button class="option-btn" data-opt="A">A. will have</button>
+                    <button class="option-btn" data-opt="B">B. having</button>
+                    <button class="option-btn" data-opt="C">C. has</button>
+                    <button class="option-btn" data-opt="D">D. have</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Giải thích chi tiết từ Thạc sỹ:</div>
+                    <div class="exp-content">
+                        <p><strong>Sự hòa hợp Chủ ngữ - Động từ:</strong> Cấu trúc <code>Each + danh từ số ít</code> đóng vai trò là một đại từ số ít, bắt buộc phải đi kèm động từ chia ở số ít là <strong>has</strong>.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q8 -->
+            <div class="question-card" id="q-ex20-8">
+                <div class="question-number">Đoạn 2 - Câu 4</div>
+                <div class="question-text">You can enjoy the big <span class="clickable-blank" onclick="showBlankAnswer(this, 'balcony')">.......</span> and lovely city view every day.</div>
+                <div class="options-grid" data-correct="D">
+                    <button class="option-btn" data-opt="A">A. kitchen</button>
+                    <button class="option-btn" data-opt="B">B. cottage</button>
+                    <button class="option-btn" data-opt="C">C. basement</button>
+                    <button class="option-btn" data-opt="D">D. balcony</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Giải thích chi tiết từ Thạc sỹ:</div>
+                    <div class="exp-content">
+                        <p><strong>Ngữ nghĩa & Bối cảnh:</strong> Để có thể ngắm được <em>"city view"</em> (tầm nhìn toàn thành phố), căn hộ chung cư cao tầng cần phải có một chiếc <strong>balcony</strong> (ban công) rộng lớn.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EX20 - PART 3 -->
+            <!-- Q9 -->
+            <div class="question-card" id="q-ex20-9">
+                <div class="question-number">Đoạn 3 - Câu 1</div>
+                <div class="question-text">I have a comfy living room <span class="clickable-blank" onclick="showBlankAnswer(this, 'where')">.......</span> I relax and watch TV.</div>
+                <div class="options-grid" data-correct="B">
+                    <button class="option-btn" data-opt="A">A. who</button>
+                    <button class="option-btn" data-opt="B">B. where</button>
+                    <button class="option-btn" data-opt="C">C. which</button>
+                    <button class="option-btn" data-opt="D">D. why</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Giải thích chi tiết từ Thạc sỹ:</div>
+                    <div class="exp-content">
+                        <p><strong>Trạng từ quan hệ (Relative Adverb):</strong> Thay thế cho danh từ chỉ nơi chốn trước đó là <em>"a comfy living room"</em> và đóng vai trò trạng ngữ trong mệnh đề quan hệ, do đó ta dùng từ chỉ địa điểm <strong>where</strong>.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q10 -->
+            <div class="question-card" id="q-ex20-10">
+                <div class="question-number">Đoạn 3 - Câu 2</div>
+                <div class="question-text">My kitchen is small, <span class="clickable-blank" onclick="showBlankAnswer(this, 'but')">.......</span> I love cooking there.</div>
+                <div class="options-grid" data-correct="C">
+                    <button class="option-btn" data-opt="A">A. or</button>
+                    <button class="option-btn" data-opt="B">B. and</button>
+                    <button class="option-btn" data-opt="C">C. but</button>
+                    <button class="option-btn" data-opt="D">D. so</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Giải thích chi tiết từ Thạc sỹ:</div>
+                    <div class="exp-content">
+                        <p><strong>Liên từ tương phản:</strong> Ý trước là nhược điểm (nhỏ), ý sau là ưu điểm sở thích tích cực (thích nấu ăn). Để biểu đạt tính tương phản rõ rệt này, liên từ <strong>but</strong> (nhưng) là duy nhất phù hợp.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q11 -->
+            <div class="question-card" id="q-ex20-11">
+                <div class="question-number">Đoạn 3 - Câu 3</div>
+                <div class="question-text">The bedroom is peaceful, perfect <span class="clickable-blank" onclick="showBlankAnswer(this, 'for')">.......</span> sleeping.</div>
+                <div class="options-grid" data-correct="B">
+                    <button class="option-btn" data-opt="A">A. at</button>
+                    <button class="option-btn" data-opt="B">B. for</button>
+                    <button class="option-btn" data-opt="C">C. with</button>
+                    <button class="option-btn" data-opt="D">D. about</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Giải thích chi tiết từ Thạc sỹ:</div>
+                    <div class="exp-content">
+                        <p><strong>Cấu trúc tính từ + giới từ:</strong> Cụm cấu trúc tính từ quen thuộc: <code>be perfect for + N / V-ing</code> mang ý nghĩa hoàn hảo, lý tưởng cho mục đích gì.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q12 -->
+            <div class="question-card" id="q-ex20-12">
+                <div class="question-number">Đoạn 3 - Câu 4</div>
+                <div class="question-text">Outside, there's <span class="clickable-blank" onclick="showBlankAnswer(this, 'a')">.......</span> small garden with some pretty flowers.</div>
+                <div class="options-grid" data-correct="C">
+                    <button class="option-btn" data-opt="A">A. some</button>
+                    <button class="option-btn" data-opt="B">B. any</button>
+                    <button class="option-btn" data-opt="C">C. a</button>
+                    <button class="option-btn" data-opt="D">D. many</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Giải thích chi tiết từ Thạc sỹ:</div>
+                    <div class="exp-content">
+                        <p><strong>Sử dụng Mạo từ:</strong> <em>"small garden"</em> là cụm danh từ số ít, đếm được, xuất hiện lần đầu tiên mang tính khái quát chưa xác định nên ta dùng mạo từ <strong>a</strong>.</p>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- EXERCISE 22 -->
+            <h3 style="color: #6C5CE7; margin-top: 30px; margin-bottom: 15px; font-weight: 800;">Exercise 22: Cloze Test - Mark correct words</h3>
+            
+            <!-- EX 22 - PART 1 -->
+            <div class="question-card" id="q-ex22-1">
+                <div class="question-number">Bài 22 (1) - Câu 1</div>
+                <div class="question-text">My dream house is <span class="clickable-blank" onclick="showBlankAnswer(this, 'in')">.......</span> the countryside.</div>
+                <div class="options-grid" data-correct="B">
+                    <button class="option-btn" data-opt="A">A. on</button>
+                    <button class="option-btn" data-opt="B">B. in</button>
+                    <button class="option-btn" data-opt="C">C. at</button>
+                    <button class="option-btn" data-opt="D">D. for</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Giải thích chi tiết từ Thạc sỹ:</div>
+                    <div class="exp-content">
+                        <p><strong>Cụm giới từ cố định:</strong> Để chỉ vị trí ở vùng nông thôn, tiếng Anh luôn dùng cố định giới từ vị trí không gian rộng lớn: <code>in the countryside</code>.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-card" id="q-ex22-2">
+                <div class="question-number">Bài 22 (1) - Câu 2</div>
+                <div class="question-text">It has <span class="clickable-blank" onclick="showBlankAnswer(this, 'lots of')">.......</span> rooms and windows.</div>
+                <div class="options-grid" data-correct="A">
+                    <button class="option-btn" data-opt="A">A. lots of</button>
+                    <button class="option-btn" data-opt="B">B. much</button>
+                    <button class="option-btn" data-opt="C">C. few</button>
+                    <button class="option-btn" data-opt="D">D. any</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Giải thích chi tiết từ Thạc sỹ:</div>
+                    <div class="exp-content">
+                        <p><strong>Lượng từ:</strong> Danh từ <em>"rooms and windows"</em> là số nhiều đếm được. <strong>lots of</strong> dùng được cho cả danh từ đếm được và không đếm được trong câu khẳng định mang nghĩa là nhiều. Loại <em>much</em> vì đi kèm từ không đếm được.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-card" id="q-ex22-3">
+                <div class="question-number">Bài 22 (1) - Câu 3</div>
+                <div class="question-text">Everyone in my family can read their favourite <span class="clickable-blank" onclick="showBlankAnswer(this, 'books')">.......</span> in this room.</div>
+                <div class="options-grid" data-correct="D">
+                    <button class="option-btn" data-opt="A">A. toys</button>
+                    <button class="option-btn" data-opt="B">B. pens</button>
+                    <button class="option-btn" data-opt="C">C. notebooks</button>
+                    <button class="option-btn" data-opt="D">D. books</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Giải thích chi tiết từ Thạc sỹ:</div>
+                    <div class="exp-content">
+                        <p><strong>Sự kết nối ngữ cảnh:</strong> Câu trước đề cập <em>"a big bookshelf"</em> (kệ sách lớn), hành động đi liền kèm theo là động từ <code>read</code> (đọc). Vì vậy, danh từ hợp logic nhất là đọc sách - <strong>books</strong>.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-card" id="q-ex22-4">
+                <div class="question-number">Bài 22 (1) - Câu 4</div>
+                <div class="question-text">There my mum and I can <span class="clickable-blank" onclick="showBlankAnswer(this, 'cook')">.......</span> together.</div>
+                <div class="options-grid" data-correct="C">
+                    <button class="option-btn" data-opt="A">A. do</button>
+                    <button class="option-btn" data-opt="B">B. make</button>
+                    <button class="option-btn" data-opt="C">C. cook</button>
+                    <button class="option-btn" data-opt="D">D. have</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Giải thích chi tiết từ Thạc sỹ:</div>
+                    <div class="exp-content">
+                        <p><strong>Mối quan hệ từ vựng (Collocation):</strong> Địa điểm diễn ra hành động được nói tới là <code>a kitchen</code> (nhà bếp). Hành động nấu ăn - <strong>cook</strong> hoàn toàn tương thích bối cảnh không gian này.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-card" id="q-ex22-5">
+                <div class="question-number">Bài 22 (1) - Câu 5</div>
+                <div class="question-text">There <span class="clickable-blank" onclick="showBlankAnswer(this, 'are')">.......</span> extra bedrooms...</div>
+                <div class="options-grid" data-correct="B">
+                    <button class="option-btn" data-opt="A">A. is</button>
+                    <button class="option-btn" data-opt="B">B. are</button>
+                    <button class="option-btn" data-opt="C">C. give</button>
+                    <button class="option-btn" data-opt="D">D. be</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Giải thích chi tiết từ Thạc sỹ:</div>
+                    <div class="exp-content">
+                        <p><strong>Cấu trúc tồn tại (There is / are):</strong> Do danh từ phía sau là <em>"extra bedrooms"</em> ở dạng số nhiều (có đuôi -s), hệ thống bắt buộc sử dụng động từ tobe số nhiều là <strong>are</strong>.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-card" id="q-ex22-6">
+                <div class="question-number">Bài 22 (1) - Câu 6</div>
+                <div class="question-text">My dream house also <span class="clickable-blank" onclick="showBlankAnswer(this, 'has')">.......</span> a big garden.</div>
+                <div class="options-grid" data-correct="A">
+                    <button class="option-btn" data-opt="A">A. has</button>
+                    <button class="option-btn" data-opt="B">B. is</button>
+                    <button class="option-btn" data-opt="C">C. gets</button>
+                    <button class="option-btn" data-opt="D">D. needs</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Giải thích chi tiết từ Thạc sỹ:</div>
+                    <div class="exp-content">
+                        <p><strong>Động từ sở hữu:</strong> Chủ ngữ ngôi thứ 3 số ít <em>"My dream house"</em> sở hữu một khu vườn, sử dụng động từ <strong>has</strong> (có) ở dạng hiện tại đơn.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EX 22 - PART 2 (Letter) -->
+            <div class="question-card" id="q-ex22-7">
+                <div class="question-number">Bài 22 (2) - Câu 1</div>
+                <div class="question-text">...a party we <span class="clickable-blank" onclick="showBlankAnswer(this, 'are having')">.......</span> in the flat next Friday...</div>
+                <div class="options-grid" data-correct="B">
+                    <button class="option-btn" data-opt="A">A. have</button>
+                    <button class="option-btn" data-opt="B">B. are having</button>
+                    <button class="option-btn" data-opt="C">C. going to have</button>
+                    <button class="option-btn" data-opt="D">D. will has</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Giải thích chi tiết từ Thạc sỹ:</div>
+                    <div class="exp-content">
+                        <p><strong>Thì Hiện tại tiếp diễn chỉ tương lai:</strong> Trạng ngữ <code>next Friday</code> chỉ tương lai, tuy nhiên đây là một bữa tiệc sinh nhật đã có kế hoạch sắp xếp chắc chắn từ trước, áp dụng cấu trúc <strong>are having</strong> là chuẩn nhất.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-card" id="q-ex22-8">
+                <div class="question-number">Bài 22 (2) - Câu 2</div>
+                <div class="question-text"><span class="clickable-blank" onclick="showBlankAnswer(this, 'So')">.......</span> we thought we’d celebrate together...</div>
+                <div class="options-grid" data-correct="D">
+                    <button class="option-btn" data-opt="A">A. Too</button>
+                    <button class="option-btn" data-opt="B">B. But</button>
+                    <button class="option-btn" data-opt="C">C. Because</button>
+                    <button class="option-btn" data-opt="D">D. So</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Giải thích chi tiết từ Thạc sỹ:</div>
+                    <div class="exp-content">
+                        <p><strong>Liên từ chỉ hệ quả:</strong> Do hai bạn có ngày sinh nhật sát cạnh nhau (vế trước giải thích nguyên nhân), dẫn tới kết quả là quyết định ăn mừng gộp chung. Chọn liên từ chỉ kết quả <strong>So</strong> (Vì vậy).</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-card" id="q-ex22-9">
+                <div class="question-number">Bài 22 (2) - Câu 3</div>
+                <div class="question-text">...anyway, if you <span class="clickable-blank" onclick="showBlankAnswer(this, 'follow')">.......</span> the direction below...</div>
+                <div class="options-grid" data-correct="B">
+                    <button class="option-btn" data-opt="A">A. to follow</button>
+                    <button class="option-btn" data-opt="B">B. follow</button>
+                    <button class="option-btn" data-opt="C">C. following</button>
+                    <button class="option-btn" data-opt="D">D. follows</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Giải thích chi tiết từ Thạc sỹ:</div>
+                    <div class="exp-content">
+                        <p><strong>Câu điều kiện loại 1:</strong> Mệnh đề chứa <code>if</code> chia ở thì Hiện tại đơn. Với chủ ngữ là đại từ số nhiều <code>you</code>, động từ <strong>follow</strong> giữ dạng nguyên thể.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-card" id="q-ex22-10">
+                <div class="question-number">Bài 22 (2) - Câu 4</div>
+                <div class="question-text">Turn left <span class="clickable-blank" onclick="showBlankAnswer(this, 'at')">.......</span> the first junction...</div>
+                <div class="options-grid" data-correct="B">
+                    <button class="option-btn" data-opt="A">A. in</button>
+                    <button class="option-btn" data-opt="B">B. at</button>
+                    <button class="option-btn" data-opt="C">C. of</button>
+                    <button class="option-btn" data-opt="D">D. on</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Giải thích chi tiết từ Thạc sỹ:</div>
+                    <div class="exp-content">
+                        <p><strong>Giới từ chỉ địa điểm chính xác:</strong> Junction (giao lộ/ngã rẽ) được coi là một tọa độ điểm chính xác trên bản đồ định vị, sử dụng giới từ <strong>at</strong> (at the junction).</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-card" id="q-ex22-11">
+                <div class="question-number">Bài 22 (2) - Câu 5</div>
+                <div class="question-text"><span class="clickable-blank" onclick="showBlankAnswer(this, 'Turn right')">.......</span> and our block of flat is the second one...</div>
+                <div class="options-grid" data-correct="D">
+                    <button class="option-btn" data-opt="A">A. Right turn</button>
+                    <button class="option-btn" data-opt="B">B. To right</button>
+                    <button class="option-btn" data-opt="C">C. To turn</button>
+                    <button class="option-btn" data-opt="D">D. Turn right</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Giải thích chi tiết từ Thạc sỹ:</div>
+                    <div class="exp-content">
+                        <p><strong>Câu mệnh lệnh (Imperative sentence):</strong> Đóng vai trò cấu trúc đưa ra lời hướng dẫn, chỉ đường, câu bắt đầu trực tiếp bằng động từ nguyên mẫu không To đứng đầu câu: <strong>Turn right</strong>.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-card" id="q-ex22-12">
+                <div class="question-number">Bài 22 (2) - Câu 6</div>
+                <div class="question-text">Look forward <span class="clickable-blank" onclick="showBlankAnswer(this, 'to seeing')">.......</span> you then!</div>
+                <div class="options-grid" data-correct="A">
+                    <button class="option-btn" data-opt="A">A. to seeing</button>
+                    <button class="option-btn" data-opt="B">B. see</button>
+                    <button class="option-btn" data-opt="C">C. to see</button>
+                    <button class="option-btn" data-opt="D">D. seeing</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Giải thích chi tiết từ Thạc sỹ:</div>
+                    <div class="exp-content">
+                        <p><strong>Cấu trúc Phrasal Verb nâng cao:</strong> Cấu trúc kinh điển cuối thư: <code>look forward to + V-ing</code> thể hiện sự mong ngóng, hồi hộp đợi chờ làm việc gì đó. Vì vậy bắt buộc là <strong>to seeing</strong>.</p>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- EXERCISE 23 -->
+            <h3 style="color: #6C5CE7; margin-top: 30px; margin-bottom: 15px; font-weight: 800;">Exercise 23: Reading Comprehension Qs</h3>
+            
+            <!-- EX 23 - PART 1 -->
+            <div class="question-card" id="q-ex23-1">
+                <div class="question-number">Bài 23 (1) - Câu 1</div>
+                <div class="question-text">How many rooms are there on the ground floor?</div>
+                <div class="options-grid" data-correct="B">
+                    <button class="option-btn" data-opt="A">A. 3</button>
+                    <button class="option-btn" data-opt="B">B. 4</button>
+                    <button class="option-btn" data-opt="C">C. 5</button>
+                    <button class="option-btn" data-opt="D">D. 6</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Minh chứng từ bài đọc:</div>
+                    <div class="exp-content">
+                        Dẫn chứng trong bài: <em>"On the ground floor, there is a living room, a kitchen, a dining room and a bathroom."</em> Tổng cộng gồm có 4 phòng.
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-card" id="q-ex23-2">
+                <div class="question-number">Bài 23 (1) - Câu 2</div>
+                <div class="question-text">Where is the balcony?</div>
+                <div class="options-grid" data-correct="B">
+                    <button class="option-btn" data-opt="A">A. on the ground floor</button>
+                    <button class="option-btn" data-opt="B">B. on the first floor</button>
+                    <button class="option-btn" data-opt="C">C. at the back of the house</button>
+                    <button class="option-btn" data-opt="D">D. behind the house</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Minh chứng từ bài đọc:</div>
+                    <div class="exp-content">
+                        Dẫn chứng trong bài: <em>"On the first floor, there are three bedrooms, one bathroom and a balcony."</em> Ban công nằm ở tầng một (first floor).
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-card" id="q-ex23-3">
+                <div class="question-number">Bài 23 (1) - Câu 3</div>
+                <div class="question-text">What are the colors in Cody’s bedroom?</div>
+                <div class="options-grid" data-correct="B">
+                    <button class="option-btn" data-opt="A">A. black and white</button>
+                    <button class="option-btn" data-opt="B">B. blue and white</button>
+                    <button class="option-btn" data-opt="C">C. blue and red</button>
+                    <button class="option-btn" data-opt="D">D. white and yellow</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Minh chứng từ bài đọc:</div>
+                    <div class="exp-content">
+                        Dẫn chứng trong bài: <em>"In my bedroom, everything is blue and white."</em> Màu sắc là xanh và trắng.
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-card" id="q-ex23-4">
+                <div class="question-number">Bài 23 (1) - Câu 4</div>
+                <div class="question-text">Why does Cody like the balcony?</div>
+                <div class="options-grid" data-correct="C">
+                    <button class="option-btn" data-opt="A">A. Because it is beautiful.</button>
+                    <button class="option-btn" data-opt="B">B. Because it is small.</button>
+                    <button class="option-btn" data-opt="C">C. Because it is large.</button>
+                    <button class="option-btn" data-opt="D">D. Because it is cozy.</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Minh chứng từ bài đọc:</div>
+                    <div class="exp-content">
+                        Dẫn chứng trong bài: <em>"...because it is very spacious so I can grow some flowers..."</em> Tính từ nâng cao <code>spacious</code> đồng nghĩa hoàn toàn với tính từ căn bản <code>large</code> (rộng rãi).
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-card" id="q-ex23-5">
+                <div class="question-number">Bài 23 (1) - Câu 5</div>
+                <div class="question-text">Where is the swimming pool?</div>
+                <div class="options-grid" data-correct="A">
+                    <button class="option-btn" data-opt="A">A. behind the house</button>
+                    <button class="option-btn" data-opt="B">B. in front of the house</button>
+                    <button class="option-btn" data-opt="C">C. on the right of the house</button>
+                    <button class="option-btn" data-opt="D">D. on the left of the house</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Minh chứng từ bài đọc:</div>
+                    <div class="exp-content">
+                        Dẫn chứng trong bài: <em>"At the back of the house, there are two swings and a small swimming pool."</em> Cụm trạng ngữ chỉ vị trí <code>at the back of</code> tương đương với <code>behind</code> (phía sau).
+                    </div>
+                </div>
+            </div>
+
+            <!-- EX 23 - PART 2 -->
+            <div class="question-card" id="q-ex23-6">
+                <div class="question-number">Bài 23 (2) - Câu 1</div>
+                <div class="question-text">Where is Janet's house located?</div>
+                <div class="options-grid" data-correct="C">
+                    <button class="option-btn" data-opt="A">A. In the city center</button>
+                    <button class="option-btn" data-opt="B">B. In the mountains</button>
+                    <button class="option-btn" data-opt="C">C. In the countryside</button>
+                    <button class="option-btn" data-opt="D">D. Near a lake</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Minh chứng từ bài đọc:</div>
+                    <div class="exp-content">
+                        Dẫn chứng trong bài: <em>"It is a lovely big house in the countryside."</em>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-card" id="q-ex23-7">
+                <div class="question-number">Bài 23 (2) - Câu 2</div>
+                <div class="question-text">The word "lovely" in the first sentence is closest in meaning to ______</div>
+                <div class="options-grid" data-correct="B">
+                    <button class="option-btn" data-opt="A">A. ugly</button>
+                    <button class="option-btn" data-opt="B">B. beautiful</button>
+                    <button class="option-btn" data-opt="C">C. small</button>
+                    <button class="option-btn" data-opt="D">D. old</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Phân tích ngữ nghĩa:</div>
+                    <div class="exp-content">
+                        Từ <code>lovely</code> mang tính chất tích cực, biểu đạt sự xinh đẹp, dễ chịu, do vậy nó đồng nghĩa gần nhất với từ <code>beautiful</code>.
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-card" id="q-ex23-8">
+                <div class="question-number">Bài 23 (2) - Câu 3</div>
+                <div class="question-text">Which room is on the ground floor?</div>
+                <div class="options-grid" data-correct="D">
+                    <button class="option-btn" data-opt="A">A. Janet's bedroom</button>
+                    <button class="option-btn" data-opt="B">B. The guest room</button>
+                    <button class="option-btn" data-opt="C">C. The bathroom</button>
+                    <button class="option-btn" data-opt="D">D. The kitchen</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Minh chứng từ bài đọc:</div>
+                    <div class="exp-content">
+                        Dẫn chứng trong bài: <em>"On the ground floor, there is a kitchen, a dining room and a living room."</em> Do đó chọn nhà bếp (kitchen).
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-card" id="q-ex23-9">
+                <div class="question-number">Bài 23 (2) - Câu 4</div>
+                <div class="question-text">What does the house have for parking the car?</div>
+                <div class="options-grid" data-correct="B">
+                    <button class="option-btn" data-opt="A">A. A swimming pool</button>
+                    <button class="option-btn" data-opt="B">B. A garage</button>
+                    <button class="option-btn" data-opt="C">C. A guest room</button>
+                    <button class="option-btn" data-opt="D">D. A small room</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Minh chứng từ bài đọc:</div>
+                    <div class="exp-content">
+                        Dẫn chứng trong bài: <em>"...a garage where my parents park the family car..."</em> Nơi đỗ xe là nhà để xe (garage).
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-card" id="q-ex23-10">
+                <div class="question-number">Bài 23 (2) - Câu 5</div>
+                <div class="question-text">What do Janet and her sister do on the grass around the house?</div>
+                <div class="options-grid" data-correct="C">
+                    <button class="option-btn" data-opt="A">A. They study.</button>
+                    <button class="option-btn" data-opt="B">B. They sleep.</button>
+                    <button class="option-btn" data-opt="C">C. They have lots of fun.</button>
+                    <button class="option-btn" data-opt="D">D. They cook.</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Minh chứng từ bài đọc:</div>
+                    <div class="exp-content">
+                        Dẫn chứng trong bài: <em>"Around the house there is a huge carpet of grass. I love it because my sister and I have lots of fun here."</em>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EX 23 - PART 3 -->
+            <div class="question-card" id="q-ex23-11">
+                <div class="question-number">Bài 23 (3) - Câu 1</div>
+                <div class="question-text">What can be the best title for the passage?</div>
+                <div class="options-grid" data-correct="A">
+                    <button class="option-btn" data-opt="A">A. My Grandparents' House</button>
+                    <button class="option-btn" data-opt="B">B. A Beautiful Garden</button>
+                    <button class="option-btn" data-opt="C">C. My Favorite Cupcakes</button>
+                    <button class="option-btn" data-opt="D">D. A Weekend Visit</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Phân tích ý chính tiêu đề:</div>
+                    <div class="exp-content">
+                        Bài văn tập trung miêu tả chi tiết về cấu trúc ngôi nhà tranh, khu vườn và trải nghiệm sống của ông bà tác giả. Do đó, tiêu đề mang tính chất bao quát hoàn hảo nhất là <strong>My Grandparents' House</strong>.
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-card" id="q-ex23-12">
+                <div class="question-number">Bài 23 (3) - Câu 2</div>
+                <div class="question-text">Where do the author's grandparents live?</div>
+                <div class="options-grid" data-correct="B">
+                    <button class="option-btn" data-opt="A">A. In a big house in the city.</button>
+                    <button class="option-btn" data-opt="B">B. In a cottage in the countryside.</button>
+                    <button class="option-btn" data-opt="C">C. In an apartment in England.</button>
+                    <button class="option-btn" data-opt="D">D. In a house with many floors.</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Minh chứng từ bài đọc:</div>
+                    <div class="exp-content">
+                        Dẫn chứng trong bài: <em>"My grandparents live in a cottage in the countryside of England."</em>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-card" id="q-ex23-13">
+                <div class="question-number">Bài 23 (3) - Câu 3</div>
+                <div class="question-text">How does the grandmother keep the house?</div>
+                <div class="options-grid" data-correct="C">
+                    <button class="option-btn" data-opt="A">A. Messy and untidy.</button>
+                    <button class="option-btn" data-opt="B">B. Big and spacious.</button>
+                    <button class="option-btn" data-opt="C">C. Clean and tidy.</button>
+                    <button class="option-btn" data-opt="D">D. Empty and quiet.</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Minh chứng từ bài đọc:</div>
+                    <div class="exp-content">
+                        Dẫn chứng trong bài: <em>"...but my grandmother always keeps it clean and tidy."</em>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-card" id="q-ex23-14">
+                <div class="question-number">Bài 23 (3) - Câu 4</div>
+                <div class="question-text">The word "it" in the second sentence of the first paragraph refers to ______</div>
+                <div class="options-grid" data-correct="B">
+                    <button class="option-btn" data-opt="A">A. the countryside</button>
+                    <button class="option-btn" data-opt="B">B. the cottage</button>
+                    <button class="option-btn" data-opt="C">C. the grandmother</button>
+                    <button class="option-btn" data-opt="D">D. England</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Phân tích thay thế đại từ:</div>
+                    <div class="exp-content">
+                        Cấu trúc câu trước: <em>"live in a cottage... The house is not very big but my grandmother always keeps <strong>it</strong>..."</em> Đại từ tân ngữ <code>it</code> thay thế trực tiếp cho danh từ làm chủ ngữ trước đó là ngôi nhà/nhà gỗ (the cottage / the house).
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-card" id="q-ex23-15">
+                <div class="question-number">Bài 23 (3) - Câu 5</div>
+                <div class="question-text">What does the author's grandmother often bake for them?</div>
+                <div class="options-grid" data-correct="D">
+                    <button class="option-btn" data-opt="A">A. Apple pies</button>
+                    <button class="option-btn" data-opt="B">B. Strawberry tarts</button>
+                    <button class="option-btn" data-opt="C">C. Bread rolls</button>
+                    <button class="option-btn" data-opt="D">D. Chocolate cupcakes</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Minh chứng từ bài đọc:</div>
+                    <div class="exp-content">
+                        Dẫn chứng trong bài: <em>"...and she bakes my favorite chocolate cupcakes whenever I go there."</em>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EX 23 - PART 4 -->
+            <div class="question-card" id="q-ex23-16">
+                <div class="question-number">Bài 23 (4) - Câu 1</div>
+                <div class="question-text">Where does Hoa's family live?</div>
+                <div class="options-grid" data-correct="B">
+                    <button class="option-btn" data-opt="A">A. In a small apartment in the city</button>
+                    <button class="option-btn" data-opt="B">B. In a beautiful house in the country</button>
+                    <button class="option-btn" data-opt="C">C. In a tall building</button>
+                    <button class="option-btn" data-opt="D">D. In a noisy area</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Minh chứng từ bài đọc:</div>
+                    <div class="exp-content">
+                        Dẫn chứng trong bài: <em>"Hoa's family lives in a beautiful house in the country."</em>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-card" id="q-ex23-17">
+                <div class="question-number">Bài 23 (4) - Câu 2</div>
+                <div class="question-text">What is to the right of Hoa's house?</div>
+                <div class="options-grid" data-correct="C">
+                    <button class="option-btn" data-opt="A">A. Tall trees</button>
+                    <button class="option-btn" data-opt="B">B. A well</button>
+                    <button class="option-btn" data-opt="C">C. A rice-paddy</button>
+                    <button class="option-btn" data-opt="D">D. Many flowers</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Minh chứng từ bài đọc:</div>
+                    <div class="exp-content">
+                        Dẫn chứng trong bài: <em>"To the right of the house, there is a rice-paddy..."</em> Phía bên phải là một cánh đồng lúa (rice-paddy).
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-card" id="q-ex23-18">
+                <div class="question-number">Bài 23 (4) - Câu 3</div>
+                <div class="question-text">The word "quiet" in paragraph 1 is closest in meaning to ______</div>
+                <div class="options-grid" data-correct="B">
+                    <button class="option-btn" data-opt="A">A. noisy</button>
+                    <button class="option-btn" data-opt="B">B. peaceful</button>
+                    <button class="option-btn" data-opt="C">C. loud</button>
+                    <button class="option-btn" data-opt="D">D. busy</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Phân tích đồng nghĩa:</div>
+                    <div class="exp-content">
+                        Tính từ <code>quiet</code> chỉ không gian yên tĩnh, không ồn ào náo nhiệt, đồng nghĩa sâu sắc với tính từ <code>peaceful</code> (yên bình, thanh tĩnh).
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-card" id="q-ex23-19">
+                <div class="question-number">Bài 23 (4) - Câu 4</div>
+                <div class="question-text">What is Hoa's father's job?</div>
+                <div class="options-grid" data-correct="C">
+                    <button class="option-btn" data-opt="A">A. He is a farmer.</button>
+                    <button class="option-btn" data-opt="B">B. He is a teacher.</button>
+                    <button class="option-btn" data-opt="C">C. He is a worker.</button>
+                    <button class="option-btn" data-opt="D">D. He is a driver.</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Minh chứng từ bài đọc:</div>
+                    <div class="exp-content">
+                        Dẫn chứng trong bài: <em>"Hoa's father is a worker. He works in a big factory."</em> nghề nghiệp là công nhân (worker).
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-card" id="q-ex23-20">
+                <div class="question-number">Bài 23 (4) - Câu 5</div>
+                <div class="question-text">How does Hoa's father travel to work?</div>
+                <div class="options-grid" data-correct="A">
+                    <button class="option-btn" data-opt="A">A. By motorbike</button>
+                    <button class="option-btn" data-opt="B">B. By bus</button>
+                    <button class="option-btn" data-opt="C">C. By car</button>
+                    <button class="option-btn" data-opt="D">D. By bicycle</button>
+                </div>
+                <div class="explanation-box">
+                    <div class="exp-title">🔑 Minh chứng từ bài đọc:</div>
+                    <div class="exp-content">
+                        Dẫn chứng trong bài: <em>"Every day, he travels to work by motorbike."</em> Phương tiện di chuyển là xe máy.
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Sticky Bottom Action Footer Bar -->
+    <div class="footer-action">
+        <button class="btn-submit" onclick="gradeTestAndShowReport()">🚀 NỘP BÀI KIỂM TRA</button>
+    </div>
+
+    <!-- Score Summary Modal Report Popup -->
+    <div class="modal-overlay" id="score-modal">
+        <div class="modal-content">
+            <div class="score-circle" id="modal-score-display">0/20</div>
+            <div class="modal-title" id="modal-title-text">KẾT QUẢ BÀI LÀM</div>
+            <div class="modal-feedback" id="modal-feedback-text">Lời nhận xét hệ thống...</div>
+            <button class="btn-close-modal" onclick="closeScoreReportModal()">Xem lại đáp án sai 🔍</button>
+        </div>
+    </div>
+
+    <!-- Core Business logic Frontend Script Architecture -->
+    <script>
+        // Web Audio API Sound Generation Synthesizer System
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSoundEffect(type) {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'correct') {
+                // Tần số âm thanh cao vút vui tươi 'Ding'
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.08); // A5
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.3);
+            } else if (type === 'wrong') {
+                // Tần số âm trầm "Téo tèo tèo"
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, audioCtx.currentTime); // A3
+                osc.frequency.linearRampToValueAtTime(110, audioCtx.currentTime + 0.25); // A2
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.3);
+            }
+        }
+
+        // Live Countdown Clock Logic Architecture
+        let countdownTimer = null;
+        let totalSecondsRemaining = 600; // 10 phút tương ứng
+        let isTimerRunning = false;
+
+        function updateTimerUI() {
+            const mins = Math.floor(totalSecondsRemaining / 60);
+            const secs = totalSecondsRemaining % 60;
+            document.getElementById('timer-text').innerText = 
+                `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function toggleTimer() {
+            const btn = document.getElementById('btn-timer-toggle');
+            if (!isTimerRunning) {
+                isTimerRunning = true;
+                btn.innerText = "TẠM DỪNG";
+                btn.style.background = "#FFA502";
+                btn.style.boxShadow = "0 3px 0 #ECCC68";
+                
+                countdownTimer = setInterval(() => {
+                    if (totalSecondsRemaining > 0) {
+                        totalSecondsRemaining--;
+                        updateTimerUI();
+                    } else {
+                        clearInterval(countdownTimer);
+                        isTimerRunning = false;
+                        btn.innerText = "BẮT ĐẦU TÍNH GIỜ LÀM BÀI";
+                        btn.style.background = "#6C5CE7";
+                        alert("Đã hết giờ làm bài. Bạn vẫn có thể tiếp tục làm, nhưng nhớ là trong phòng thi thật, bạn chỉ nên làm một bài như thế này trong 10 phút thôi nha.");
+                    }
+                }, 1000);
+            } else {
+                isTimerRunning = false;
+                clearInterval(countdownTimer);
+                btn.innerText = "TIẾP TỤC LÀM BÀI";
+                btn.style.background = "#2ED573";
+                btn.style.boxShadow = "0 3px 0 #26AF5F";
+            }
+        }
+
+        // Translation Accordion Handler
+        function toggleTranslation(id) {
+            const transBox = document.getElementById(`trans-${id}`);
+            if(transBox.style.display === "block") {
+                transBox.style.display = "none";
+            } else {
+                transBox.style.display = "block";
+            }
+        }
+
+        // Interactive Hidden Blank Answer view triggers
+        function showBlankAnswer(element, exactText) {
+            element.innerText = exactText;
+            element.style.background = "#E6FFFA";
+            element.style.color = "#00A86B";
+            element.style.borderColor = "#00C9A7";
+        }
+
+        // Shuffle Options Array Utility Algorithm (Fisher-Yates)
+        function shuffleOptionsInCards() {
+            const grids = document.querySelectorAll('.options-grid');
+            grids.forEach(grid => {
+                const buttons = Array.from(grid.children);
+                // Thực hiện thuật toán hoán vị trộn ngẫu nhiên
+                for (let i = buttons.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    grid.appendChild(buttons[j]);
+                }
+            });
+        }
+
+        // Confetti Fireworks Particle FX System Engine
+        const canvas = document.getElementById('confetti-canvas');
+        const ctx = canvas.getContext('2d');
+        let confettiParticles = [];
+
+        function resizeConfettiCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeConfettiCanvas);
+        resizeConfettiCanvas();
+
+        function spawnConfettiBurst() {
+            const colors = ['#8854C0', '#00C9A7', '#FDCB6E', '#FF4757', '#54A0FF', '#5F27CD'];
+            for (let i = 0; i < 120; i++) {
+                confettiParticles.push({
+                    x: window.innerWidth / 2,
+                    y: window.innerHeight / 2 - 50,
+                    size: Math.random() * 8 + 4,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    speedX: (Math.random() - 0.5) * 12,
+                    speedY: (Math.random() - 0.5) * 12 - 5,
+                    gravity: 0.25,
+                    rotation: Math.random() * 360,
+                    rotationSpeed: (Math.random() - 0.5) * 10,
+                    opacity: 1
+                });
+            }
+            animateConfettiFrame();
+        }
+
+        function animateConfettiFrame() {
+            if (confettiParticles.length === 0) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            confettiParticles.forEach((p, index) => {
+                p.speedY += p.gravity;
+                p.x += p.speedX;
+                p.y += p.speedY;
+                p.rotation += p.rotationSpeed;
+                p.opacity -= 0.008;
+
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate((p.rotation * Math.PI) / 180);
+                ctx.globalAlpha = p.opacity;
+                ctx.fillStyle = p.color;
+                ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                ctx.restore();
+
+                if (p.opacity <= 0 || p.y > canvas.height) {
+                    confettiParticles.splice(index, 1);
+                }
+            });
+
+            requestAnimationFrame(animateConfettiFrame);
+        }
+
+        // Click selection validation engine
+        function initializeAnswerSelectionClickTriggers() {
+            const cards = document.querySelectorAll('.question-card');
+            cards.forEach(card => {
+                const grid = card.querySelector('.options-grid');
+                const correctLetter = grid.getAttribute('data-correct');
+                const buttons = card.querySelectorAll('.option-btn');
+                const explanation = card.querySelector('.explanation-box');
+
+                buttons.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        // Khóa không cho bấm lại nút khác trong cùng một thẻ câu hỏi
+                        if(grid.classList.contains('has-answered')) return;
+                        grid.classList.contains('has-answered');
+                        
+                        // Đánh dấu thẻ câu hỏi đã hoàn thiện
+                        grid.classList.add('has-answered');
+                        buttons.forEach(b => b.classList.add('disabled'));
+
+                        const chosenLetter = btn.getAttribute('data-opt');
+                        if (chosenLetter === correctLetter) {
+                            // Xử lý khi học sinh chọn ĐÚNG
+                            btn.classList.add('correct');
+                            playSoundEffect('correct');
+                            card.style.borderColor = varValue('--bg-correct');
+                        } else {
+                            // Xử lý khi học sinh chọn SAI
+                            btn.classList.add('wrong');
+                            card.classList.add('shake-animation');
+                            playSoundEffect('wrong');
+                            card.style.borderColor = varValue('--bg-wrong');
+                            
+                            // Tự động tìm kiếm làm nổi bật đáp án đúng ngay lập tức để đối chiếu sửa sai
+                            buttons.forEach(b => {
+                                if(b.getAttribute('data-opt') === correctLetter) {
+                                    b.classList.add('correct');
+                                }
+                            });
+                            
+                            // Gỡ bỏ hiệu ứng rung lắc sau khi chạy xong
+                            setTimeout(() => {
+                                card.classList.remove('shake-animation');
+                            }, 400);
+                        }
+                        // Hiển thị phần phân tích sư phạm chuyên sâu của giáo viên
+                        if(explanation) explanation.style.display = "block";
+                    });
+                });
+            });
+        }
+
+        function varValue(varName) {
+            return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+        }
+
+        // Test Scoring and Comprehensive Modal Report Analytics
+        function gradeTestAndShowReport() {
+            const totalQuestions = document.querySelectorAll('.question-card').length;
+            let correctCount = 0;
+
+            document.querySelectorAll('.question-card').forEach(card => {
+                const correctBtn = card.querySelector('.option-btn.correct');
+                // Nếu tìm thấy nút có class 'correct' trùng với nút học sinh bấm, tính điểm
+                if(correctBtn && !correctBtn.classList.contains('disabled' === false) && card.querySelector('.option-btn.wrong') === null) {
+                    // Để chắc chắn, kiểm tra xem nút được bấm có phải nút đúng không
+                    const chosenAndCorrect = card.querySelector('.option-btn.correct:not(.disabled)');
+                    if(card.querySelectorAll('.option-btn.correct').length > 0) {
+                        // Kiểm tra xem có bấm sai không
+                        const wrongBtn = card.querySelector('.option-btn.wrong');
+                        if(!wrongBtn) correctCount++;
+                    }
+                } else {
+                    // Trường hợp click chọn đúng cấu trúc ở phát bấm đầu tiên
+                    const totalCorrectInCard = card.querySelectorAll('.option-btn.correct');
+                    const hasWrong = card.querySelector('.option-btn.wrong');
+                    if(totalCorrectInCard.length > 0 && !hasWrong) {
+                        correctCount++;
+                    }
+                }
+            });
+
+            // Biên soạn lời nhận xét học thuật dựa trên khung điểm Gamification
+            let evaluationTitle = "";
+            let evaluationFeedback = "";
+            const percentage = (correctCount / totalQuestions) * 100;
+
+            if (percentage === 100) {
+                evaluationTitle = "🏆 THIÊN TÀI TIẾNG ANH!";
+                evaluationFeedback = "Tuyệt hảo! Con đã xuất sắc trả lời đúng toàn bộ tất cả các câu hỏi của cô Lê Hằng. Hãy tiếp tục phát huy phong độ đỉnh cao này nhé!";
+                spawnConfettiBurst(); // Thưởng pháo hoa cực lớn cho điểm tuyệt đối
+            } else if (percentage >= 80) {
+                evaluationTitle = "🌟 LÀM TỐT LẮM!";
+                evaluationFeedback = `Rất đáng khen! Con đạt được ${correctCount}/${totalQuestions} câu đúng. Chỉ còn một vài lỗi nhỏ không đáng kể, hãy kiểm tra lại bảng giải thích nhé!`;
+                spawnConfettiBurst();
+            } else if (percentage >= 50) {
+                evaluationTitle = "💪 CỐ LÊN NHÉ!";
+                evaluationFeedback = `Khá tốt! Con đạt đúng ${correctCount}/${totalQuestions} câu. Hãy đọc kỹ phần dẫn chứng màu tím để hiểu sâu bản chất ngữ pháp của bài thi con nha!`;
+            } else {
+                evaluationTitle = "📚 CẦN ÔN TẬP THÊM!";
+                evaluationFeedback = `Đừng nản chí nhé! Con đúng được ${correctCount}/${totalQuestions} câu. Hãy xem kỹ lại bảng từ vựng mở rộng (Glossary) bên trái và thử sức lại vào lần sau.`;
+            }
+
+            // Đưa dữ liệu điểm số lên Modal Popup
+            document.getElementById('modal-score-display').innerText = `${correctCount}/${totalQuestions}`;
+            document.getElementById('modal-title-text').innerText = evaluationTitle;
+            document.getElementById('modal-feedback-text').innerText = evaluationFeedback;
+
+            // Kích hoạt hiển thị cửa sổ báo điểm
+            document.getElementById('score-modal').classList.add('active');
+        }
+
+        function closeScoreReportModal() {
+            document.getElementById('score-modal').classList.remove('active');
+        }
+
+        // Bootstrapping Core Engine Initialization on Page Load
+        window.addEventListener('DOMContentLoaded', () => {
+            shuffleOptionsInCards();
+            initializeAnswerSelectionClickTriggers();
+            updateTimerUI();
+        });
+    </script>
+</body>
+</html>
